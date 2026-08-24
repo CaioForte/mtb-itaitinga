@@ -112,7 +112,7 @@ function setMode(next) {
   mode = next;
   const s = sizes[next];
   stage.style.aspectRatio = `${s.w} / ${s.h}`;
-  counter.textContent = next === 'story' ? '2 de 2' : '1 de 2';
+ // counter.textContent = next === 'story' ? '2 de 2' : '1 de 2';
   feedButton.classList.toggle('active', next === 'feed');
   storyButton.classList.toggle('active', next === 'story');
   setCanvasSize();
