@@ -42,7 +42,7 @@ h1{margin:2px 0 0;font-size:29px;line-height:1.05;font-style:italic;font-weight:
 .control-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 button{font:inherit}
 .secondary{
-  min-height:62px;border:1px solid #333b43;border-radius:18px;background:#252b32;color:#fff;
+  min-height:32px;border:1px solid #333b43;border-radius:18px;background:#252b32;color:#fff;
   font-size:21px;cursor:pointer
 }
 .secondary:active,.format:active,.download:active{transform:translateY(1px)}
@@ -50,7 +50,7 @@ button{font:inherit}
 .zoom-row label,.zoom-row output{font-size:17px;color:#e4e7ea}
 input[type=range]{width:100%;accent-color:var(--orange)}
 .where{text-align:center;font-weight:900;font-size:17px;margin-bottom:10px}
-.format-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.format-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .format{
   min-height:30px;border-radius:18px;border:1px solid #343b43;background:#242a30;color:#fff;
   cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px
