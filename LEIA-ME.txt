@@ -1,6 +1,6 @@
-Versao 10
-- A foto agora e recortada por clip() usando a abertura da moldura, sem
-  destination-in compositing.
-- O recorte tem margem de seguranca de 2px.
-- O download aguarda a decodificacao das imagens e dois frames de renderizacao.
-- Cache-buster atualizado para app.js v10.
+MTB Corrigido v12
+
+- Mantida a correção de recorte/exportação da v11.
+- Substituída a área de logo da moldura STORY pela imagem correta enviada pelo usuário.
+- A moldura FEED original foi preservada.
+- Cache-buster atualizado para v12.
