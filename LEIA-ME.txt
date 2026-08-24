@@ -1,9 +1,1 @@
-ITATINGA MTB RACE - VERSAO 7
-
-Correção principal:
-- O download agora exporta exatamente o mesmo canvas usado na prévia.
-- Isso elimina diferenças entre a prévia e o arquivo baixado.
-- A foto continua limitada pela máscara da abertura da moldura.
-- Cache do app e das máscaras atualizado para v7.
-
-Substitua todos os arquivos da versão anterior pelo conteúdo deste ZIP.
+Versao 8 - mascara da abertura derivada diretamente da transparencia da moldura e levemente reduzida para impedir qualquer vazamento da foto. Previa e exportacao usam o mesmo canvas.

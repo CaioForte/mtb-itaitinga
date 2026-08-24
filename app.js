@@ -34,10 +34,10 @@ const frameImages = {};
 const maskImages = {};
 for (const key of Object.keys(sizes)) {
   const img = new Image();
-  img.src = sizes[key].frame + '?v=7';
+  img.src = sizes[key].frame + '?v=8';
   frameImages[key] = img;
   const mask = new Image();
-  mask.src = sizes[key].frame.replace('.png', '-mask.png') + '?v=7';
+  mask.src = sizes[key].frame.replace('.png', '-mask.png') + '?v=8';
   maskImages[key] = mask;
 }
 
