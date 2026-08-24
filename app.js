@@ -34,10 +34,10 @@ const frameImages = {};
 const maskImages = {};
 for (const key of Object.keys(sizes)) {
   const img = new Image();
-  img.src = sizes[key].frame + '?v=10';
+  img.src = sizes[key].frame + '?v=15';
   frameImages[key] = img;
   const mask = new Image();
-  mask.src = sizes[key].frame.replace('.png', '-mask.png') + '?v=10';
+  mask.src = sizes[key].frame.replace('.png', '-mask.png') + '?v=15';
   maskImages[key] = mask;
 }
 
@@ -77,18 +77,11 @@ function getOpening(mode) {
 function drawClippedPhoto(targetCtx, w, h) {
   if (!photo) return;
 
-  const o = getOpening(mode);
-  targetCtx.save();
-
-  // Use a real canvas clipping path instead of destination-in compositing.
-  // This is more reliable on mobile browsers when the final canvas is
-  // converted to a PNG with toBlob().
-  targetCtx.beginPath();
-  targetCtx.ellipse(o.cx, o.cy, o.rx, o.ry, 0, 0, Math.PI * 2);
-  targetCtx.clip();
-
+  // The frame itself contains the exact transparent opening.
+  // Draw the photo first and let the original frame image cover everything
+  // outside that opening. This keeps the downloaded PNG pixel-identical to
+  // the frame shown in the preview and avoids a second, approximate mask.
   drawPhoto(targetCtx, w, h);
-  targetCtx.restore();
 }
 
 function draw() {
