@@ -34,10 +34,10 @@ const frameImages = {};
 const maskImages = {};
 for (const key of Object.keys(sizes)) {
   const img = new Image();
-  img.src = sizes[key].frame + '?v=6';
+  img.src = sizes[key].frame + '?v=7';
   frameImages[key] = img;
   const mask = new Image();
-  mask.src = sizes[key].frame.replace('.png', '-mask.png') + '?v=6';
+  mask.src = sizes[key].frame.replace('.png', '-mask.png') + '?v=7';
   maskImages[key] = mask;
 }
 
@@ -188,25 +188,26 @@ stage.addEventListener('pointercancel', () => dragging=false);
 
 downloadButton.addEventListener('click', () => {
   if (!photo) return;
-  const s = sizes[mode];
-  const out = document.createElement('canvas');
-  out.width = s.w; out.height = s.h;
-  const octx = out.getContext('2d');
-  octx.clearRect(0,0,s.w,s.h);
-  drawClippedPhoto(octx, s.w, s.h);
-  const frame = frameImages[mode];
-  if (frame.complete) octx.drawImage(frame,0,0,s.w,s.h);
-  out.toBlob(blob => {
-    if (!blob) return;
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `itaitinga-mtb-${mode}.png`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),1000);
-  }, 'image/png');
+
+  // The preview canvas is the source of truth.  Export exactly what the
+  // user sees, instead of rebuilding the composition a second time.
+  // This prevents the downloaded file from ever using a different mask,
+  // scale or frame position than the preview.
+  draw();
+
+  requestAnimationFrame(() => {
+    canvas.toBlob(blob => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `itaitinga-mtb-${mode}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }, 'image/png');
+  });
 });
 
 window.addEventListener('resize', draw);

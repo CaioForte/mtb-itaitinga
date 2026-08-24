@@ -1,9 +1,9 @@
-ITAITINGA MTB RACE — versão 6
+ITATINGA MTB RACE - VERSAO 7
 
 Correção principal:
-- As máscaras da abertura da moldura agora usam canal alfa real.
-- A foto fica limitada exatamente à abertura oval da moldura, sem vazar para as laterais ou para fora do recorte.
-- A mesma máscara é usada na prévia e no arquivo PNG baixado.
-- Feed 4:5 e Story 9:16 mantidos.
+- O download agora exporta exatamente o mesmo canvas usado na prévia.
+- Isso elimina diferenças entre a prévia e o arquivo baixado.
+- A foto continua limitada pela máscara da abertura da moldura.
+- Cache do app e das máscaras atualizado para v7.
 
-Substitua os arquivos da versão anterior pelos arquivos desta pasta.
+Substitua todos os arquivos da versão anterior pelo conteúdo deste ZIP.
