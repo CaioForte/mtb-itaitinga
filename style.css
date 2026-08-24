@@ -97,7 +97,7 @@ input[type=range]{width:100%;accent-color:var(--orange)}
   .format{min-height:68px}
   .format span{font-size:16px}
   .format small{font-size:13px}
-  .download{min-height:58px;font-size:20px}
+  .download{min-height:38px;font-size:20px}
 }
 
 /* Em celulares baixos, reduz ainda mais a prévia para nunca empurrar os controles para fora da tela. */
