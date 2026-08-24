@@ -34,10 +34,10 @@ const frameImages = {};
 const maskImages = {};
 for (const key of Object.keys(sizes)) {
   const img = new Image();
-  img.src = sizes[key].frame;
+  img.src = sizes[key].frame + '?v=5';
   frameImages[key] = img;
   const mask = new Image();
-  mask.src = sizes[key].frame.replace('.png', '-mask.png');
+  mask.src = sizes[key].frame.replace('.png', '-mask.png') + '?v=5';
   maskImages[key] = mask;
 }
 
@@ -69,8 +69,10 @@ function drawPhoto(targetCtx, w, h) {
 function drawClippedPhoto(targetCtx, w, h) {
   if (!photo) return;
   const mask = maskImages[mode];
+  // Never draw the photo unmasked. During image loading, leaving it
+  // unmasked causes the photo to briefly/incorrectly appear outside
+  // the frame. Wait for the exact opening mask instead.
   if (!mask || !mask.complete || !mask.naturalWidth) {
-    drawPhoto(targetCtx, w, h);
     return;
   }
   const off = document.createElement('canvas');
