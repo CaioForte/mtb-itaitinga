@@ -1,10 +1,18 @@
-ITAITINGA MTB RACE - EDITOR AJUSTADO
+ITAITINGA MTB RACE - versão corrigida
 
-Correcoes desta versao:
-- Controles ficam realmente ocultos antes da selecao da foto.
-- Somente o botao Escolha sua foto abre a selecao; tocar no canvas vazio nao abre a galeria.
-- Removido capture=environment para abrir o seletor de imagens normalmente.
-- Story usa proporcao 9:16 real no preview e fica dimensionado para mostrar a moldura inteira no celular.
-- Feed usa 4:5 real.
-- Foto continua atras da moldura transparente.
-- Zoom 70% a 300%.
+Correções:
+- Prévia do Story fixa em proporção 9:16, sem barras laterais.
+- Canvas de saída usa exatamente 1080x1920 (Story) e 1080x1350 (Feed/Post).
+- Moldura é desenhada em tamanho integral, sem esticar.
+- Foto fica atrás da moldura e cobre todo o canvas.
+- Zoom mantém o centro visual ao alterar a escala.
+- Arraste por toque/mouse para reposicionar.
+- Botão "Escolha sua foto" abre o seletor de imagens; tocar na prévia não abre a galeria.
+- Download gera PNG com a mesma composição da prévia.
+
+Arquivos:
+index.html
+style.css
+app.js
+assets/moldura-feed.png
+assets/moldura-story.png
