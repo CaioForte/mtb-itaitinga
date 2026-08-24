@@ -31,10 +31,14 @@ let lastX = 0;
 let lastY = 0;
 
 const frameImages = {};
+const maskImages = {};
 for (const key of Object.keys(sizes)) {
   const img = new Image();
   img.src = sizes[key].frame;
   frameImages[key] = img;
+  const mask = new Image();
+  mask.src = sizes[key].frame.replace('.png', '-mask.png');
+  maskImages[key] = mask;
 }
 
 function setCanvasSize() {
@@ -62,12 +66,30 @@ function drawPhoto(targetCtx, w, h) {
   targetCtx.drawImage(photo, x, y, drawW, drawH);
 }
 
+function drawClippedPhoto(targetCtx, w, h) {
+  if (!photo) return;
+  const mask = maskImages[mode];
+  if (!mask || !mask.complete || !mask.naturalWidth) {
+    drawPhoto(targetCtx, w, h);
+    return;
+  }
+  const off = document.createElement('canvas');
+  off.width = w; off.height = h;
+  const octx = off.getContext('2d');
+  octx.clearRect(0, 0, w, h);
+  drawPhoto(octx, w, h);
+  octx.globalCompositeOperation = 'destination-in';
+  octx.drawImage(mask, 0, 0, w, h);
+  octx.globalCompositeOperation = 'source-over';
+  targetCtx.drawImage(off, 0, 0);
+}
+
 function draw() {
   const s = sizes[mode];
   ctx.clearRect(0,0,s.w,s.h);
 
   // Photo is always drawn first and covers the whole canvas.
-  if (photo) drawPhoto(ctx, s.w, s.h);
+  if (photo) drawClippedPhoto(ctx, s.w, s.h);
 
   // Frame is always full-size 1080x1920 or 1080x1350.
   const frame = frameImages[mode];
@@ -169,7 +191,7 @@ downloadButton.addEventListener('click', () => {
   out.width = s.w; out.height = s.h;
   const octx = out.getContext('2d');
   octx.clearRect(0,0,s.w,s.h);
-  drawPhoto(octx, s.w, s.h);
+  drawClippedPhoto(octx, s.w, s.h);
   const frame = frameImages[mode];
   if (frame.complete) octx.drawImage(frame,0,0,s.w,s.h);
   out.toBlob(blob => {
@@ -187,4 +209,5 @@ downloadButton.addEventListener('click', () => {
 
 window.addEventListener('resize', draw);
 for (const img of Object.values(frameImages)) img.onload = draw;
+for (const img of Object.values(maskImages)) img.onload = draw;
 setMode('story');
