@@ -1,1 +1,5 @@
-Versao 8 - mascara da abertura derivada diretamente da transparencia da moldura e levemente reduzida para impedir qualquer vazamento da foto. Previa e exportacao usam o mesmo canvas.
+Versao 9 - correcao da exportacao no celular.
+A mascara da abertura foi reduzida em 16 px nas bordas para impedir vazamento
+da foto sobre a moldura. Preview e arquivo baixado usam a mesma composicao.
+Tambem foi atualizado o cache-buster do app.js para evitar que celulares
+carreguem uma versao antiga do JavaScript.
