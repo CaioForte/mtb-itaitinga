@@ -1,52 +1,9 @@
-# Itaitinga MTB Race — versão sem Node
+VERSÃO COM DUAS MOLDURAS SEPARADAS
 
-Esta pasta é um site estático. Não há Node.js, npm, Wrangler, banco de dados, API ou servidor de processamento.
+assets/moldura-feed.png  = 1080x1350 (Feed/Post 4:5)
+assets/moldura-story.png = 1080x1920 (Story 9:16)
 
-Arquivos:
-- index.html
-- style.css
-- app.js
-- assets/moldura.png
+O app não estica mais uma única moldura para os dois formatos.
+Cada formato usa sua própria arte e o preview mantém a proporção do arquivo final.
 
-## Publicação
-
-Você pode publicar os arquivos usando uma hospedagem de arquivos estáticos que aceite upload pelo navegador.
-
-No Cloudflare, use uma opção de hospedagem de Static Assets/Pages disponível no seu painel e envie o conteúdo desta pasta. Não é necessário instalar Node no computador.
-
-## Funcionamento
-
-A foto do participante é processada no próprio navegador:
-1. escolhe a foto;
-2. arrasta e aplica zoom;
-3. a moldura é desenhada por cima;
-4. o navegador gera o JPG;
-5. o participante baixa ou compartilha.
-
-A foto não é enviada para o servidor por este site.
-
-## Estrutura
-
-index.html
-style.css
-app.js
-assets/
-  moldura.png
-
-
-CORREÇÃO: o download agora usa dataURL, permitindo testar o index.html diretamente pelo arquivo file://. Em produção, a hospedagem Cloudflare é recomendada.
-
-
-Esta edição é mobile-first: otimizada para iPhone e Android, com editor maior, controles grandes e suporte à área segura do iOS.
-
-
-VERSÃO TELA CHEIA: removido o botão verde separado. O participante toca diretamente no centro da moldura para escolher a foto. No celular, os controles ficam sobrepostos na parte inferior para evitar rolagem.
-
-
-CORREÇÃO 24/08/2026: o botão central agora usa um <label> nativo ligado ao input type=file oculto. Isso corrige o toque em Android/iPhone e abre o seletor de imagens sem depender de file.click() em um elemento removido.
-
-
-VERSÃO FORMATOS: removido o botão Compartilhar. Após escolher a foto, o participante seleciona Feed/Post (4:5) ou Story (9:16). A exportação usa o formato escolhido.
-
-
-CORREÇÃO DE PREVIEW/EXPORTAÇÃO: preview e download usam o mesmo renderer; canvas mantém proporção real no celular; exportação usa canvas independente em 1080x1350 ou 1080x1920.
+Substitua index.html, app.js, style.css e a pasta assets no GitHub/Cloudflare Pages.
