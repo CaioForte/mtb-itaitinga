@@ -1,18 +1,9 @@
-ITAITINGA MTB RACE - versão corrigida
+ITAITINGA MTB RACE — versão 6
 
-Correções:
-- Prévia do Story fixa em proporção 9:16, sem barras laterais.
-- Canvas de saída usa exatamente 1080x1920 (Story) e 1080x1350 (Feed/Post).
-- Moldura é desenhada em tamanho integral, sem esticar.
-- Foto fica atrás da moldura e cobre todo o canvas.
-- Zoom mantém o centro visual ao alterar a escala.
-- Arraste por toque/mouse para reposicionar.
-- Botão "Escolha sua foto" abre o seletor de imagens; tocar na prévia não abre a galeria.
-- Download gera PNG com a mesma composição da prévia.
+Correção principal:
+- As máscaras da abertura da moldura agora usam canal alfa real.
+- A foto fica limitada exatamente à abertura oval da moldura, sem vazar para as laterais ou para fora do recorte.
+- A mesma máscara é usada na prévia e no arquivo PNG baixado.
+- Feed 4:5 e Story 9:16 mantidos.
 
-Arquivos:
-index.html
-style.css
-app.js
-assets/moldura-feed.png
-assets/moldura-story.png
+Substitua os arquivos da versão anterior pelos arquivos desta pasta.
