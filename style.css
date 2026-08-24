@@ -52,7 +52,7 @@ input[type=range]{width:100%;accent-color:var(--orange)}
 .where{text-align:center;font-weight:900;font-size:17px;margin-bottom:10px}
 .format-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .format{
-  min-height:30px;border-radius:18px;border:1px solid #343b43;background:#242a30;color:#fff;
+  min-height:15px;border-radius:18px;border:1px solid #343b43;background:#242a30;color:#fff;
   cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px
 }
 .format span{font-size:18px}
