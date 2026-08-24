@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#090b0d">
+  <meta name="description" content="Crie sua foto oficial da Itaitinga MTB Race.">
+  <title>Itaitinga MTB Race — Foto de atleta</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<main class="app">
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">ITAITINGA MTB RACE</div>
+      <h1>Minha foto de atleta</h1>
+    </div>
+    <div class="step" id="step">1 de 2</div>
+  </header>
+
+  <section class="layout">
+    <div class="card">
+      <div class="stage" id="stage">
+        <canvas id="editor" width="1024" height="1536"></canvas>
+        <div class="empty" id="empty" role="button" tabindex="0" aria-label="Escolher sua foto">
+          <div class="plus">＋</div>
+          <b>Escolha sua foto</b>
+          <span>Depois você pode arrastar e dar zoom.</span>
+        </div>
+      </div>
+
+      <div class="actions">
+
+        <div class="editor-controls" id="editRow" hidden>
+          <button id="reset" type="button">↺ Reajustar</button>
+          <button id="center" type="button">◎ Centralizar</button>
+        </div>
+
+        <div class="zoom" id="zoomRow" hidden>
+          <span>Zoom</span>
+          <input id="zoom" type="range" min="1" max="3" value="1" step=".01">
+          <output id="zoomOut">100%</output>
+        </div>
+
+        <div class="final-actions">
+          <button class="download" id="download" type="button" disabled>⬇ Baixar foto</button>
+          <button class="share" id="share" type="button" disabled>↗ Compartilhar</button>
+        </div>
+        <small id="hint">Toque no centro para escolher sua foto.</small>
+      </div>
+    </div>
+
+    <aside class="card info">
+      <h2>Como funciona</h2>
+      <ol>
+        <li><b>Escolha sua foto</b><span>Selecione uma foto da galeria ou tire uma na hora.</span></li>
+        <li><b>Ajuste o enquadramento</b><span>Arraste e use o zoom para posicionar a foto.</span></li>
+        <li><b>Baixe e poste</b><span>A arte final é gerada no próprio aparelho.</span></li>
+      </ol>
+      <div class="privacy">
+        🔒 <b>Sua foto fica no seu aparelho.</b>
+        <span>Este site não faz upload da foto do participante.</span>
+      </div>
+    </aside>
+  </section>
+
+  <footer>ITAITINGA MTB RACE · PEDALE • SUPERE • CONQUISTE</footer>
+</main>
+<script src="./app.js"></script>
+</body>
+</html>
