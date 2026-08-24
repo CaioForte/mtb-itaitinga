@@ -47,3 +47,6 @@ CORREÇÃO 24/08/2026: o botão central agora usa um <label> nativo ligado ao in
 
 
 VERSÃO FORMATOS: removido o botão Compartilhar. Após escolher a foto, o participante seleciona Feed/Post (4:5) ou Story (9:16). A exportação usa o formato escolhido.
+
+
+CORREÇÃO DE PREVIEW/EXPORTAÇÃO: preview e download usam o mesmo renderer; canvas mantém proporção real no celular; exportação usa canvas independente em 1080x1350 ou 1080x1920.
