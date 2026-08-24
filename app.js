@@ -1,17 +1,31 @@
 (() => {
+  let W = 1080;
+  let H = 1350;
+
   const FORMATS = {
-    feed:  { w: 1080, h: 1350, label: "Feed / Post", overlay: "./assets/moldura-feed.png" },
-    story: { w: 1080, h: 1920, label: "Story",        overlay: "./assets/moldura-story.png" }
+    feed: {
+      w: 1080,
+      h: 1350,
+      label: "Feed / Post",
+      overlay: "./assets/moldura-feed.png"
+    },
+    story: {
+      w: 1080,
+      h: 1920,
+      label: "Story",
+      overlay: "./assets/moldura-story.png"
+    }
   };
 
   let format = "feed";
-  let W = FORMATS[format].w;
-  let H = FORMATS[format].h;
 
   const c = document.getElementById("editor");
   const ctx = c.getContext("2d", { alpha: false });
-  const stage = document.getElementById("stage");
+
   const file = document.getElementById("file");
+  const photo = new Image();
+  const overlay = new Image();
+
   const empty = document.getElementById("empty");
   const editRow = document.getElementById("editRow");
   const zoomRow = document.getElementById("zoomRow");
@@ -23,24 +37,163 @@
   const step = document.getElementById("step");
   const hint = document.getElementById("hint");
 
-  const photo = new Image();
-  const overlays = { feed: new Image(), story: new Image() };
-  overlays.feed.src = FORMATS.feed.overlay;
-  overlays.story.src = FORMATS.story.overlay;
-
   let ready = false;
   let url = null;
-  let base = 1, z = 1;
-  let x = W / 2, y = H / 2;
+
+  let base = 1;
+  let z = 1;
+  let x = W / 2;
+  let y = H / 2;
+
   let pointers = new Map();
   let gesture = null;
 
-  function currentOverlay() {
-    return overlays[format];
+  const overlayCanvas = document.createElement("canvas");
+  const overlayCtx = overlayCanvas.getContext("2d");
+
+  function loadOverlay() {
+    const src = FORMATS[format].overlay;
+
+    overlay.onload = () => {
+      prepareOverlay();
+      draw();
+    };
+
+    overlay.onerror = () => {
+      console.error("Não foi possível carregar a moldura:", src);
+    };
+
+    overlay.src = src + "?v=" + Date.now();
+  }
+
+  /*
+   * As novas molduras possuem o centro preto como área reservada
+   * para a foto. Esta função transforma somente essa região preta
+   * conectada ao centro em transparência.
+   */
+  function prepareOverlay() {
+    if (!overlay.naturalWidth || !overlay.naturalHeight) return;
+
+    overlayCanvas.width = overlay.naturalWidth;
+    overlayCanvas.height = overlay.naturalHeight;
+
+    overlayCtx.clearRect(
+      0,
+      0,
+      overlayCanvas.width,
+      overlayCanvas.height
+    );
+
+    overlayCtx.drawImage(
+      overlay,
+      0,
+      0,
+      overlay.naturalWidth,
+      overlay.naturalHeight
+    );
+
+    const image = overlayCtx.getImageData(
+      0,
+      0,
+      overlayCanvas.width,
+      overlayCanvas.height
+    );
+
+    const data = image.data;
+    const width = overlayCanvas.width;
+    const height = overlayCanvas.height;
+
+    const startX = Math.floor(width / 2);
+    const startY = Math.floor(height / 2);
+
+    const startIndex = (startY * width + startX) * 4;
+
+    if (
+      data[startIndex] > 70 ||
+      data[startIndex + 1] > 70 ||
+      data[startIndex + 2] > 70
+    ) {
+      overlayCtx.putImageData(image, 0, 0);
+      return;
+    }
+
+    const visited = new Uint8Array(width * height);
+    const queue = new Int32Array(width * height);
+
+    let head = 0;
+    let tail = 0;
+
+    const start = startY * width + startX;
+
+    queue[tail++] = start;
+    visited[start] = 1;
+
+    const threshold = 70;
+
+    while (head < tail) {
+      const pos = queue[head++];
+
+      const px = pos % width;
+      const py = Math.floor(pos / width);
+      const i = pos * 4;
+
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+
+      if (
+        r <= threshold &&
+        g <= threshold &&
+        b <= threshold
+      ) {
+        data[i + 3] = 0;
+
+        if (px > 0) {
+          const n = pos - 1;
+          if (!visited[n]) {
+            visited[n] = 1;
+            queue[tail++] = n;
+          }
+        }
+
+        if (px < width - 1) {
+          const n = pos + 1;
+          if (!visited[n]) {
+            visited[n] = 1;
+            queue[tail++] = n;
+          }
+        }
+
+        if (py > 0) {
+          const n = pos - width;
+          if (!visited[n]) {
+            visited[n] = 1;
+            queue[tail++] = n;
+          }
+        }
+
+        if (py < height - 1) {
+          const n = pos + width;
+          if (!visited[n]) {
+            visited[n] = 1;
+            queue[tail++] = n;
+          }
+        }
+      }
+    }
+
+    overlayCtx.putImageData(image, 0, 0);
   }
 
   function cover() {
-    return Math.max(W / photo.naturalWidth, H / photo.naturalHeight);
+    if (!photo.naturalWidth || !photo.naturalHeight) {
+      return 1;
+    }
+
+    return Math.max(
+      W / photo.naturalWidth,
+      H / photo.naturalHeight
+    );
   }
 
   function label() {
@@ -48,86 +201,149 @@
   }
 
   function reset() {
-    if (!ready) return;
     base = cover();
     z = 1;
+
     x = W / 2;
     y = H / 2;
+
     zoom.value = 1;
+
     label();
     draw();
   }
 
-  function resizeStage() {
-    stage.style.aspectRatio = `${W} / ${H}`;
+  function drawPhoto() {
+    if (!ready || !photo.complete) return;
+
+    const w = photo.naturalWidth * base * z;
+    const h = photo.naturalHeight * base * z;
+
+    ctx.drawImage(
+      photo,
+      x - w / 2,
+      y - h / 2,
+      w,
+      h
+    );
   }
 
-  function drawOverlay(targetCtx) {
-    const overlay = currentOverlay();
-    if (!overlay.complete || !overlay.naturalWidth) return;
+  function drawOverlay() {
+    if (!overlay.complete || !overlayCanvas.width) return;
 
-    // As molduras já são criadas no tamanho final de cada formato.
-    // Não redimensionamos nem esticamos a arte.
-    targetCtx.drawImage(overlay, 0, 0, W, H);
+    const scale = Math.min(
+      W / overlay.naturalWidth,
+      H / overlay.naturalHeight
+    );
+
+    const ow = overlay.naturalWidth * scale;
+    const oh = overlay.naturalHeight * scale;
+
+    const ox = (W - ow) / 2;
+    const oy = (H - oh) / 2;
+
+    ctx.drawImage(
+      overlayCanvas,
+      ox,
+      oy,
+      ow,
+      oh
+    );
   }
 
   function draw() {
     c.width = W;
     c.height = H;
+
     ctx.fillStyle = "#111";
     ctx.fillRect(0, 0, W, H);
 
-    if (ready && photo.complete) {
-      const w = photo.naturalWidth * base * z;
-      const h = photo.naturalHeight * base * z;
-      ctx.drawImage(photo, x - w / 2, y - h / 2, w, h);
-    }
+    // A foto é desenhada primeiro.
+    drawPhoto();
 
-    drawOverlay(ctx);
+    // A moldura é desenhada por cima.
+    drawOverlay();
   }
 
   function setFormat(name) {
+    if (!FORMATS[name]) return;
+
     format = name;
+
     W = FORMATS[name].w;
     H = FORMATS[name].h;
-    formatButtons.forEach(b => b.classList.toggle("active", b.dataset.format === name));
-    resizeStage();
 
-    if (ready) reset();
-    else draw();
+    formatButtons.forEach(button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.format === name
+      );
+    });
+
+    loadOverlay();
+
+    if (ready) {
+      reset();
+    } else {
+      draw();
+    }
   }
 
-  formatButtons.forEach(b => b.addEventListener("click", () => setFormat(b.dataset.format)));
+  formatButtons.forEach(button => {
+    button.addEventListener(
+      "click",
+      () => setFormat(button.dataset.format)
+    );
+  });
 
   file.onchange = () => {
     const f = file.files && file.files[0];
-    if (!f || !f.type.startsWith("image/")) return;
 
-    if (url) URL.revokeObjectURL(url);
+    if (!f || !f.type.startsWith("image/")) {
+      return;
+    }
+
+    if (url) {
+      URL.revokeObjectURL(url);
+    }
+
     url = URL.createObjectURL(f);
 
     photo.onload = () => {
       ready = true;
+
       empty.hidden = true;
       editRow.hidden = false;
       zoomRow.hidden = false;
       formatBox.hidden = false;
+
       download.disabled = false;
+
       step.textContent = "2 de 2";
-      hint.textContent = "Escolha Feed ou Story e ajuste sua foto.";
+      hint.textContent =
+        "Escolha Feed ou Story e ajuste sua foto.";
+
       reset();
     };
 
     photo.src = url;
   };
 
+  // Zoom de 50% até 300%.
+  zoom.min = "0.5";
+  zoom.max = "3";
+  zoom.step = ".01";
+  zoom.value = "1";
+
   zoom.oninput = () => {
-    z = +zoom.value;
+    z = Number(zoom.value);
+
     label();
     draw();
   };
 
   document.getElementById("reset").onclick = reset;
+
   document.getElementById("center").onclick = () => {
     x = W / 2;
     y = H / 2;
@@ -136,6 +352,7 @@
 
   function point(e) {
     const r = c.getBoundingClientRect();
+
     return {
       x: (e.clientX - r.left) * W / r.width,
       y: (e.clientY - r.top) * H / r.height
@@ -143,36 +360,91 @@
   }
 
   function dist(a, b) {
-    return Math.hypot(a.x - b.x, a.y - b.y);
+    return Math.hypot(
+      a.x - b.x,
+      a.y - b.y
+    );
   }
 
   c.onpointerdown = e => {
     if (!ready) return;
+
     c.setPointerCapture(e.pointerId);
-    pointers.set(e.pointerId, point(e));
+
+    pointers.set(
+      e.pointerId,
+      point(e)
+    );
 
     if (pointers.size === 1) {
       const p = point(e);
-      gesture = { t: "drag", s: p, x, y };
+
+      gesture = {
+        t: "drag",
+        s: p,
+        x,
+        y
+      };
+
     } else if (pointers.size === 2) {
       const [a, b] = [...pointers.values()];
-      gesture = { t: "pinch", d: dist(a, b), z, x, y };
+
+      gesture = {
+        t: "pinch",
+        d: dist(a, b),
+        z,
+        x,
+        y
+      };
     }
   };
 
   c.onpointermove = e => {
-    if (!pointers.has(e.pointerId) || !ready) return;
-    pointers.set(e.pointerId, point(e));
+    if (!pointers.has(e.pointerId) || !ready) {
+      return;
+    }
 
-    if (pointers.size === 1 && gesture?.t === "drag") {
+    pointers.set(
+      e.pointerId,
+      point(e)
+    );
+
+    if (
+      pointers.size === 1 &&
+      gesture?.t === "drag"
+    ) {
       const p = [...pointers.values()][0];
-      x = gesture.x + p.x - gesture.s.x;
-      y = gesture.y + p.y - gesture.s.y;
+
+      x =
+        gesture.x +
+        p.x -
+        gesture.s.x;
+
+      y =
+        gesture.y +
+        p.y -
+        gesture.s.y;
+
       draw();
-    } else if (pointers.size === 2 && gesture?.t === "pinch") {
+
+    } else if (
+      pointers.size === 2 &&
+      gesture?.t === "pinch"
+    ) {
       const [a, b] = [...pointers.values()];
-      z = Math.max(1, Math.min(3, gesture.z * dist(a, b) / Math.max(1, gesture.d)));
+
+      z = Math.max(
+        0.5,
+        Math.min(
+          3,
+          gesture.z *
+          dist(a, b) /
+          Math.max(1, gesture.d)
+        )
+      );
+
       zoom.value = z;
+
       label();
       draw();
     }
@@ -180,33 +452,62 @@
 
   function end(e) {
     pointers.delete(e.pointerId);
-    if (!pointers.size) gesture = null;
-    else if (pointers.size === 1) {
+
+    if (!pointers.size) {
+      gesture = null;
+
+    } else if (pointers.size === 1) {
       const p = [...pointers.values()][0];
-      gesture = { t: "drag", s: p, x, y };
+
+      gesture = {
+        t: "drag",
+        s: p,
+        x,
+        y
+      };
     }
   }
 
   c.onpointerup = end;
   c.onpointercancel = end;
 
-  download.onclick = () => {
+  function canvasDataUrl() {
+    draw();
+
+    return c.toDataURL(
+      "image/jpeg",
+      0.94
+    );
+  }
+
+  download.onclick = async () => {
     try {
-      draw();
-      const dataUrl = c.toDataURL("image/jpeg", 0.95);
+      const dataUrl = canvasDataUrl();
+
       const a = document.createElement("a");
+
       a.href = dataUrl;
-      a.download = `itaitinga-mtb-race-${format}.jpg`;
+      a.download =
+        `itaitinga-mtb-race-${format}.jpg`;
+
+      a.style.display = "none";
+
       document.body.appendChild(a);
+
       a.click();
       a.remove();
+
     } catch (e) {
       console.error(e);
-      alert("Não foi possível gerar a foto. Tente novamente.");
+
+      alert(
+        "Não foi possível gerar a foto. Tente novamente."
+      );
     }
   };
 
-  resizeStage();
   label();
+  loadOverlay();
   draw();
+
 })();
