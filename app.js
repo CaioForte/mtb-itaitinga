@@ -1,10 +1,14 @@
 (() => {
-  const W=1024,H=1536;
+  let W=1080,H=1350;
+  const FORMATS={feed:{w:1080,h:1350,label:"Feed / Post"},story:{w:1080,h:1920,label:"Story"}};
+  let format="feed";
   const c=document.getElementById("editor"),ctx=c.getContext("2d",{alpha:false});
   const file=document.getElementById("file"), overlay=new Image(), photo=new Image();
   const empty=document.getElementById("empty"), editRow=document.getElementById("editRow");
   const zoomRow=document.getElementById("zoomRow"), zoom=document.getElementById("zoom"), zoomOut=document.getElementById("zoomOut");
-  const download=document.getElementById("download"), share=document.getElementById("share");
+  const download=document.getElementById("download");
+  const formatBox=document.getElementById("formatBox");
+  const formatButtons=[...document.querySelectorAll(".format-btn")];
   const step=document.getElementById("step"), hint=document.getElementById("hint");
   let ready=false,url=null,base=1,z=1,x=W/2,y=H/2,pointers=new Map(),gesture=null;
 
@@ -14,14 +18,31 @@
   function cover(){return Math.max(W/photo.naturalWidth,H/photo.naturalHeight)}
   function label(){zoomOut.value=Math.round(z*100)+"%"}
   function reset(){base=cover();z=1;x=W/2;y=H/2;zoom.value=1;label();draw()}
+  function drawOverlay(targetCtx){
+    if(!overlay.complete)return;
+    // Mantém a arte original inteira, sem cortar elementos.
+    const scale=Math.min(W/overlay.naturalWidth,H/overlay.naturalHeight);
+    const ow=overlay.naturalWidth*scale, oh=overlay.naturalHeight*scale;
+    const ox=(W-ow)/2, oy=(H-oh)/2;
+    targetCtx.drawImage(overlay,ox,oy,ow,oh);
+  }
   function draw(){
+    c.width=W;c.height=H;
     ctx.fillStyle="#111";ctx.fillRect(0,0,W,H);
     if(ready&&photo.complete){
       const w=photo.naturalWidth*base*z,h=photo.naturalHeight*base*z;
       ctx.drawImage(photo,x-w/2,y-h/2,w,h);
     }
-    if(overlay.complete)ctx.drawImage(overlay,0,0,W,H);
+    drawOverlay(ctx);
   }
+  function setFormat(name){
+    format=name;
+    W=FORMATS[name].w;H=FORMATS[name].h;
+    formatButtons.forEach(b=>b.classList.toggle("active",b.dataset.format===name));
+    if(ready)reset(); else draw();
+  }
+  formatButtons.forEach(b=>b.addEventListener("click",()=>setFormat(b.dataset.format)));
+
   // A área central de "Escolha sua foto" também abre a galeria/câmera.
   // O clique é disparado diretamente pela ação do usuário, funcionando em iPhone,
   // Android e navegadores de desktop.
@@ -29,7 +50,7 @@
   file.onchange=()=>{
     const f=file.files&&file.files[0];if(!f||!f.type.startsWith("image/"))return;
     if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(f);
-    photo.onload=()=>{ready=true;empty.hidden=true;editRow.hidden=false;zoomRow.hidden=false;download.disabled=false;share.disabled=!navigator.share;step.textContent="2 de 2";hint.textContent="Arraste a foto. Use dois dedos para aproximar ou afastar.";reset()};
+    photo.onload=()=>{ready=true;empty.hidden=true;editRow.hidden=false;zoomRow.hidden=false;formatBox.hidden=false;download.disabled=false;step.textContent="2 de 2";hint.textContent="Escolha Feed ou Story e ajuste sua foto.";reset()};
     photo.src=url;
   };
   zoom.oninput=()=>{z=+zoom.value;label();draw()};
@@ -55,63 +76,26 @@
   function end(e){pointers.delete(e.pointerId);if(!pointers.size)gesture=null;else if(pointers.size===1){const p=[...pointers.values()][0];gesture={t:"drag",s:p,x,y}}}
   c.onpointerup=end;c.onpointercancel=end;
 
-  function blob(){return new Promise(r=>c.toBlob(r,"image/jpeg",.94))}
   function canvasDataUrl() {
     draw();
-    // O dataURL é mais compatível quando o site é aberto diretamente
-    // pelo arquivo index.html (file://), sem um servidor.
     return c.toDataURL("image/jpeg", 0.94);
-  }
-
-  function dataUrlToBlob(dataUrl) {
-    const parts = dataUrl.split(",");
-    const mime = parts[0].match(/:(.*?);/)[1];
-    const binary = atob(parts[1]);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return new Blob([bytes], { type: mime });
   }
 
   download.onclick=async()=>{
     try {
-      const dataUrl = canvasDataUrl();
-      const a = document.createElement("a");
-      a.href = dataUrl;
-      a.download = "itaitinga-mtb-race.jpg";
-      a.style.display = "none";
+      const dataUrl=canvasDataUrl();
+      const a=document.createElement("a");
+      a.href=dataUrl;
+      a.download=`itaitinga-mtb-race-${format}.jpg`;
+      a.style.display="none";
       document.body.appendChild(a);
       a.click();
       a.remove();
     } catch(e) {
       console.error(e);
-      alert("O navegador bloqueou a geração da imagem. Abra o site pelo endereço da Cloudflare e tente novamente.");
+      alert("Não foi possível gerar a foto. Tente novamente.");
     }
   };
 
-  share.onclick=async()=>{
-    try {
-      const dataUrl = canvasDataUrl();
-      const b = dataUrlToBlob(dataUrl);
-      const f = new File([b], "itaitinga-mtb-race.jpg", {type:"image/jpeg"});
-
-      if(navigator.share && (!navigator.canShare || navigator.canShare({files:[f]}))) {
-        await navigator.share({
-          title:"Itaitinga MTB Race",
-          text:"Minha foto da Itaitinga MTB Race!",
-          files:[f]
-        });
-      } else {
-        const a = document.createElement("a");
-        a.href = dataUrl;
-        a.download = "itaitinga-mtb-race.jpg";
-        a.click();
-      }
-    } catch(e) {
-      if(e.name!=="AbortError") {
-        console.error(e);
-        alert("Não foi possível compartilhar a foto. Use o botão Baixar foto pronta.");
-      }
-    }
-  };
   label();draw();
 })();

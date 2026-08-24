@@ -44,3 +44,6 @@ VERSÃO TELA CHEIA: removido o botão verde separado. O participante toca direta
 
 
 CORREÇÃO 24/08/2026: o botão central agora usa um <label> nativo ligado ao input type=file oculto. Isso corrige o toque em Android/iPhone e abre o seletor de imagens sem depender de file.click() em um elemento removido.
+
+
+VERSÃO FORMATOS: removido o botão Compartilhar. Após escolher a foto, o participante seleciona Feed/Post (4:5) ou Story (9:16). A exportação usa o formato escolhido.
