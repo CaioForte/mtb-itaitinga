@@ -34,10 +34,10 @@ const frameImages = {};
 const maskImages = {};
 for (const key of Object.keys(sizes)) {
   const img = new Image();
-  img.src = sizes[key].frame + '?v=9';
+  img.src = sizes[key].frame + '?v=10';
   frameImages[key] = img;
   const mask = new Image();
-  mask.src = sizes[key].frame.replace('.png', '-mask.png') + '?v=9';
+  mask.src = sizes[key].frame.replace('.png', '-mask.png') + '?v=10';
   maskImages[key] = mask;
 }
 
@@ -66,24 +66,29 @@ function drawPhoto(targetCtx, w, h) {
   targetCtx.drawImage(photo, x, y, drawW, drawH);
 }
 
+function getOpening(mode) {
+  // Coordinates are in the final 1080px canvas and match the transparent
+  // opening in the supplied frame.  A 2px inset guarantees the photo never
+  // crosses the frame edge, including on Android canvas export.
+  if (mode === 'story') return { cx: 540, cy: 965, rx: 409, ry: 658 };
+  return { cx: 542, cy: 691, rx: 404, ry: 396 };
+}
+
 function drawClippedPhoto(targetCtx, w, h) {
   if (!photo) return;
-  const mask = maskImages[mode];
-  // Never draw the photo unmasked. During image loading, leaving it
-  // unmasked causes the photo to briefly/incorrectly appear outside
-  // the frame. Wait for the exact opening mask instead.
-  if (!mask || !mask.complete || !mask.naturalWidth) {
-    return;
-  }
-  const off = document.createElement('canvas');
-  off.width = w; off.height = h;
-  const octx = off.getContext('2d');
-  octx.clearRect(0, 0, w, h);
-  drawPhoto(octx, w, h);
-  octx.globalCompositeOperation = 'destination-in';
-  octx.drawImage(mask, 0, 0, w, h);
-  octx.globalCompositeOperation = 'source-over';
-  targetCtx.drawImage(off, 0, 0);
+
+  const o = getOpening(mode);
+  targetCtx.save();
+
+  // Use a real canvas clipping path instead of destination-in compositing.
+  // This is more reliable on mobile browsers when the final canvas is
+  // converted to a PNG with toBlob().
+  targetCtx.beginPath();
+  targetCtx.ellipse(o.cx, o.cy, o.rx, o.ry, 0, 0, Math.PI * 2);
+  targetCtx.clip();
+
+  drawPhoto(targetCtx, w, h);
+  targetCtx.restore();
 }
 
 function draw() {
@@ -186,28 +191,36 @@ stage.addEventListener('pointermove', e => {
 stage.addEventListener('pointerup', () => dragging=false);
 stage.addEventListener('pointercancel', () => dragging=false);
 
-downloadButton.addEventListener('click', () => {
+downloadButton.addEventListener('click', async () => {
   if (!photo) return;
 
-  // The preview canvas is the source of truth.  Export exactly what the
-  // user sees, instead of rebuilding the composition a second time.
-  // This prevents the downloaded file from ever using a different mask,
-  // scale or frame position than the preview.
+  // Wait until the selected photo and the frame are decoded before exporting.
+  // Android browsers can otherwise export a canvas from a previous render.
+  try {
+    if (photo.decode) await photo.decode();
+  } catch (_) {}
+
+  const frame = frameImages[mode];
+  try {
+    if (frame.decode) await frame.decode();
+  } catch (_) {}
+
   draw();
 
-  requestAnimationFrame(() => {
-    canvas.toBlob(blob => {
-      if (!blob) return;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `itaitinga-mtb-${mode}.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1500);
-    }, 'image/png');
-  });
+  // Force one paint cycle before reading the canvas.
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+  canvas.toBlob(blob => {
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `itaitinga-mtb-${mode}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+  }, 'image/png');
 });
 
 window.addEventListener('resize', draw);

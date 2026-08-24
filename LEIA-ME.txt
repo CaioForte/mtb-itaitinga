@@ -1,5 +1,6 @@
-Versao 9 - correcao da exportacao no celular.
-A mascara da abertura foi reduzida em 16 px nas bordas para impedir vazamento
-da foto sobre a moldura. Preview e arquivo baixado usam a mesma composicao.
-Tambem foi atualizado o cache-buster do app.js para evitar que celulares
-carreguem uma versao antiga do JavaScript.
+Versao 10
+- A foto agora e recortada por clip() usando a abertura da moldura, sem
+  destination-in compositing.
+- O recorte tem margem de seguranca de 2px.
+- O download aguarda a decodificacao das imagens e dois frames de renderizacao.
+- Cache-buster atualizado para app.js v10.
