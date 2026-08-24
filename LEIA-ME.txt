@@ -41,3 +41,6 @@ Esta edição é mobile-first: otimizada para iPhone e Android, com editor maior
 
 
 VERSÃO TELA CHEIA: removido o botão verde separado. O participante toca diretamente no centro da moldura para escolher a foto. No celular, os controles ficam sobrepostos na parte inferior para evitar rolagem.
+
+
+CORREÇÃO 24/08/2026: o botão central agora usa um <label> nativo ligado ao input type=file oculto. Isso corrige o toque em Android/iPhone e abre o seletor de imagens sem depender de file.click() em um elemento removido.

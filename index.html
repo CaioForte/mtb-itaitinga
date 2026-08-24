@@ -22,11 +22,12 @@
     <div class="card">
       <div class="stage" id="stage">
         <canvas id="editor" width="1024" height="1536"></canvas>
-        <div class="empty" id="empty" role="button" tabindex="0" aria-label="Escolher sua foto">
+        <label class="empty" id="empty" for="file" aria-label="Escolher sua foto">
+          <input id="file" type="file" accept="image/*" hidden>
           <div class="plus">＋</div>
           <b>Escolha sua foto</b>
           <span>Depois você pode arrastar e dar zoom.</span>
-        </div>
+        </label>
       </div>
 
       <div class="actions">

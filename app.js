@@ -25,10 +25,6 @@
   // A área central de "Escolha sua foto" também abre a galeria/câmera.
   // O clique é disparado diretamente pela ação do usuário, funcionando em iPhone,
   // Android e navegadores de desktop.
-  empty.addEventListener("click",()=>file.click());
-  empty.addEventListener("keydown",e=>{
-    if(e.key==="Enter"||e.key===" "){e.preventDefault();file.click();}
-  });
 
   file.onchange=()=>{
     const f=file.files&&file.files[0];if(!f||!f.type.startsWith("image/"))return;
