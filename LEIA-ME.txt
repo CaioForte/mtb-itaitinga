@@ -1,9 +1,10 @@
-VERSÃO COM DUAS MOLDURAS SEPARADAS
+ITAITINGA MTB RACE - EDITOR AJUSTADO
 
-assets/moldura-feed.png  = 1080x1350 (Feed/Post 4:5)
-assets/moldura-story.png = 1080x1920 (Story 9:16)
-
-O app não estica mais uma única moldura para os dois formatos.
-Cada formato usa sua própria arte e o preview mantém a proporção do arquivo final.
-
-Substitua index.html, app.js, style.css e a pasta assets no GitHub/Cloudflare Pages.
+Correcoes desta versao:
+- Controles ficam realmente ocultos antes da selecao da foto.
+- Somente o botao Escolha sua foto abre a selecao; tocar no canvas vazio nao abre a galeria.
+- Removido capture=environment para abrir o seletor de imagens normalmente.
+- Story usa proporcao 9:16 real no preview e fica dimensionado para mostrar a moldura inteira no celular.
+- Feed usa 4:5 real.
+- Foto continua atras da moldura transparente.
+- Zoom 70% a 300%.
