@@ -1,6 +1,8 @@
-Versao 10
-- A foto agora e recortada por clip() usando a abertura da moldura, sem
-  destination-in compositing.
-- O recorte tem margem de seguranca de 2px.
-- O download aguarda a decodificacao das imagens e dois frames de renderizacao.
-- Cache-buster atualizado para app.js v10.
+Versao 11
+
+- Removido o recorte oval da foto.
+- A foto agora é desenhada normalmente no canvas.
+- A moldura original PNG é desenhada por cima da foto.
+- A transparência existente na própria moldura define a área correta da foto.
+- Mantidos o ajuste, zoom, arraste, Feed/Story e download.
+- Cache-buster atualizado para app.js v11.
