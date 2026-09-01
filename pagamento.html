@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    Pagamento | Itaitinga MTB Race
+  </title>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+
+      margin: 0;
+
+      min-height: 100vh;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      padding: 24px;
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      background:
+        #080808;
+
+      color:
+        #ffffff;
+
+    }
+
+
+    .card {
+
+      width: 100%;
+
+      max-width: 520px;
+
+      background:
+        #111111;
+
+      border:
+        1px solid #292929;
+
+      border-radius:
+        18px;
+
+      padding:
+        38px 28px;
+
+      text-align:
+        center;
+
+      box-shadow:
+        0 20px 60px
+        rgba(0,0,0,.45);
+
+    }
+
+
+    .logo {
+
+      font-size:
+        13px;
+
+      font-weight:
+        800;
+
+      letter-spacing:
+        2px;
+
+      margin-bottom:
+        28px;
+
+      opacity:
+        .8;
+
+    }
+
+
+    .icone {
+
+      width:
+        72px;
+
+      height:
+        72px;
+
+      margin:
+        0 auto 20px;
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        center;
+
+      border-radius:
+        50%;
+
+      font-size:
+        34px;
+
+      background:
+        #222;
+
+    }
+
+
+    h1 {
+
+      margin:
+        0 0 12px;
+
+      font-size:
+        28px;
+
+    }
+
+
+    #mensagem {
+
+      color:
+        #bcbcbc;
+
+      line-height:
+        1.6;
+
+    }
+
+
+    .dados {
+
+      margin:
+        28px 0;
+
+      padding:
+        20px;
+
+      text-align:
+        left;
+
+      background:
+        #181818;
+
+      border-radius:
+        12px;
+
+    }
+
+
+    .dados div {
+
+      display:
+        flex;
+
+      justify-content:
+        space-between;
+
+      gap:
+        20px;
+
+      padding:
+        9px 0;
+
+      border-bottom:
+        1px solid #292929;
+
+    }
+
+
+    .dados div:last-child {
+
+      border-bottom:
+        none;
+
+    }
+
+
+    .dados span {
+
+      color:
+        #888;
+
+    }
+
+
+    .confirmado {
+
+      color:
+        #54df73;
+
+    }
+
+
+    .aguardando {
+
+      color:
+        #ffb629;
+
+    }
+
+
+    .btn {
+
+      display:
+        inline-block;
+
+      width:
+        100%;
+
+      padding:
+        15px 20px;
+
+      border-radius:
+        9px;
+
+      text-decoration:
+        none;
+
+      font-weight:
+        800;
+
+      background:
+        #ffffff;
+
+      color:
+        #000000;
+
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+  <main class="card">
+
+    <div class="logo">
+      ITAITINGA MTB RACE • XCP 2026
+    </div>
+
+
+    <div
+      class="icone"
+      id="icone"
+    >
+      ⏳
+    </div>
+
+
+    <h1 id="titulo">
+      VERIFICANDO PAGAMENTO...
+    </h1>
+
+
+    <p id="mensagem">
+      Aguarde enquanto verificamos a confirmação
+      da sua inscrição.
+    </p>
+
+
+    <div
+      class="dados"
+      id="dados"
+      hidden
+    >
+
+      <div>
+        <span>Inscrição</span>
+        <strong id="numero">—</strong>
+      </div>
+
+      <div>
+        <span>Categoria</span>
+        <strong id="categoria">—</strong>
+      </div>
+
+      <div>
+        <span>Pagamento</span>
+        <strong id="pagamento">—</strong>
+      </div>
+
+      <div>
+        <span>Status</span>
+        <strong id="status">—</strong>
+      </div>
+
+    </div>
+
+
+    <a
+      href="/"
+      class="btn"
+    >
+      VOLTAR AO SITE
+    </a>
+
+  </main>
+
+
+  <script>
+
+    const API_URL =
+      "https://script.google.com/macros/s/AKfycbzBL3zWUZLpSDvR_Oomuk50_3YkfEWb_WlwhALZAO1d3BbXOvPAE64gHwZ8SiTVAyHf/exec";
+
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+
+    const inscricao =
+      params.get(
+        "inscricao"
+      );
+
+
+    const titulo =
+      document.getElementById(
+        "titulo"
+      );
+
+    const mensagem =
+      document.getElementById(
+        "mensagem"
+      );
+
+    const icone =
+      document.getElementById(
+        "icone"
+      );
+
+    const dadosBox =
+      document.getElementById(
+        "dados"
+      );
+
+
+    async function verificarPagamento() {
+
+      if (!inscricao) {
+
+        titulo.textContent =
+          "INSCRIÇÃO NÃO INFORMADA";
+
+        mensagem.textContent =
+          "Não foi possível identificar a inscrição.";
+
+        icone.textContent =
+          "⚠️";
+
+        return;
+
+      }
+
+
+      try {
+
+        const url =
+          API_URL +
+          "?action=publicStatusPagamento" +
+          "&inscricao=" +
+          encodeURIComponent(
+            inscricao
+          );
+
+
+        const response =
+          await fetch(url);
+
+
+        const json =
+          await response.json();
+
+
+        if (
+          !json.sucesso ||
+          !json.dados?.encontrado
+        ) {
+
+          throw new Error(
+            "Inscrição não encontrada."
+          );
+
+        }
+
+
+        const dados =
+          json.dados;
+
+
+        document
+          .getElementById(
+            "numero"
+          )
+          .textContent =
+            "#" +
+            dados.numeroInscricao;
+
+
+        document
+          .getElementById(
+            "categoria"
+          )
+          .textContent =
+            dados.categoria || "—";
+
+
+        document
+          .getElementById(
+            "pagamento"
+          )
+          .textContent =
+            dados.pagamento || "—";
+
+
+        document
+          .getElementById(
+            "status"
+          )
+          .textContent =
+            dados.statusInscricao || "—";
+
+
+        dadosBox.hidden = false;
+
+
+        const confirmado =
+          String(
+            dados.pagamento
+          ).toLowerCase() ===
+          "pago";
+
+
+        if (confirmado) {
+
+          icone.textContent =
+            "✓";
+
+          titulo.textContent =
+            "PAGAMENTO CONFIRMADO!";
+
+          titulo.className =
+            "confirmado";
+
+          mensagem.textContent =
+            "Sua inscrição está garantida. " +
+            "Também enviamos a confirmação para o seu e-mail.";
+
+        } else {
+
+          icone.textContent =
+            "⏳";
+
+          titulo.textContent =
+            "PROCESSANDO PAGAMENTO";
+
+          titulo.className =
+            "aguardando";
+
+          mensagem.textContent =
+            "O pagamento foi realizado, mas ainda estamos aguardando a confirmação. Esta página será atualizada automaticamente.";
+
+          setTimeout(
+            verificarPagamento,
+            3000
+          );
+
+        }
+
+
+      } catch (erro) {
+
+        console.error(
+          erro
+        );
+
+        titulo.textContent =
+          "VERIFICANDO PAGAMENTO";
+
+        mensagem.textContent =
+          "Ainda não recebemos a confirmação. Vamos tentar novamente em alguns segundos.";
+
+        setTimeout(
+          verificarPagamento,
+          3000
+        );
+
+      }
+
+    }
+
+
+    verificarPagamento();
+
+  </script>
+
+</body>
+
+</html>
